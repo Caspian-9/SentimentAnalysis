@@ -13,7 +13,7 @@ section(title, publish time, and body) of each article in the dataset using sort
 or sort_cbc, analyze each article title and article body's polarity score using polarity_analysis,
 and convert the publish times of articles in the dataset into datetime.datetime format. Lastly, the
 store_to_dataclass functions help gather all the filtered sections of the dataset and store them
-in a dataclass. 
+in a dataclass.
 
     This module contains one dataclass: FilteredDataset. Results from sort_cbc,
 sort_start_or_global, datetime_converter_star, datetime_converter_cbc, datetime_converter_global,
@@ -172,7 +172,7 @@ def datetime_converter_cbc(file_name: str) -> list[datetime.datetime]:
     # format for all CBC business articles
     date_times_cbc = []
 
-    for article in find_business_cbc(file_name):
+    for article in read_file(file_name):
         raw_date = article['publish_time']
         year = int(raw_date[0:4])
         month = int(raw_date[5: 7])
@@ -197,7 +197,7 @@ def datetime_converter_star(file_name: str) -> list[datetime.datetime]:
     # format for all the Star business articles
     date_times_star = []
 
-    for article in find_business_star_global(file_name):
+    for article in read_file(file_name):
         raw_date = article['publish_time']
         year = int(raw_date[14: 19])
         month = month_num[str(raw_date[6: 9])]
@@ -224,9 +224,9 @@ def datetime_converter_global(file_name: str) -> list[datetime.datetime]:
     # format for all Global business articles
     date_times_global = []
 
-    for article in find_business_star_global(file_name):
+    for article in read_file(file_name):
         raw_date = article['publish_time']
-        split_lst = str.split(raw_date, ' ')
+        split_lst = raw_date.split(' ')
         year = int(split_lst[3])
         raw_month = split_lst[1]
         short_month = raw_month[0: 3]
