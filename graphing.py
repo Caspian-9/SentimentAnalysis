@@ -239,7 +239,7 @@ def generate_graph(time_ind: int, size_ind: int) -> str:
         xaxis=dict(type = 'category'),
         yaxis={
             'title': 'Percentage'
-        }
+        },
     )
 
     img_name = f'graphs/graph{time_ind}_{size_ind}.png'
