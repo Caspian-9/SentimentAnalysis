@@ -67,6 +67,7 @@ def read_data(file: str) -> list[list[float]]:
         position = 11
     else:
         position = 12
+    # position = 11
 
     with open(file) as csv_file:
         data = csv.reader(csv_file)
@@ -76,7 +77,7 @@ def read_data(file: str) -> list[list[float]]:
             list_num = num % 5
             # Since the files all end in 3 blank lines, and I don't know how to
             # get rid of them otherwise.
-            if row:
+            if row and row[position]:
                 filtered_data[list_num].append(float(row[position]))
 
     return filtered_data
@@ -91,8 +92,16 @@ def get_percentage_for_quarter(quarter: int) -> float:
     """
     total_pos = 0
     total_articles = 0
-    start_date = PUBLISH_DATES[quarter]
-    for i in range((start_date - PUBLISH_DATES[quarter - 1]).days):
+
+    if quarter == 0:
+        start_date = datetime.datetime(2020, 1, 1)
+    else:
+        start_date = PUBLISH_DATES[quarter - 1]
+
+    end_date = PUBLISH_DATES[quarter]
+    # for i in range((start_date - PUBLISH_DATES[quarter - 1]).days):
+    for i in range((end_date - start_date).days):
+        # print('i = ' + str(i))
         global_articles = get_avg_polarity_for_day(start_date + datetime.timedelta(i), GLOBAL)
         star_articles = get_avg_polarity_for_day(start_date + datetime.timedelta(i), STAR)
         cbc_articles = get_avg_polarity_for_day(start_date + datetime.timedelta(i), CBC)
@@ -133,8 +142,10 @@ def generate_graph(months_until: int) -> None:
 
     fig.add_trace(
         go.Bar(
-            x=PUBLISH_DATES[1:],
-            y=[get_percentage_for_quarter(i) for i in range(1, 5)],
+            # x=PUBLISH_DATES[1:],
+            x=[d.date() for d in PUBLISH_DATES],
+            # y=[get_percentage_for_quarter(i) for i in range(1, 5)],
+            y=[get_percentage_for_quarter(i) for i in range(5)],
             name='%age of positive articles'
         ))
 
@@ -144,42 +155,51 @@ def generate_graph(months_until: int) -> None:
         read_data('datasets/first_quarter.csv'),
         read_data('datasets/second_quarter.csv'),
         read_data('datasets/third_quarter.csv')
+        # read_data('datasets/dataset_2020_07_14.csv'),
+        # read_data('datasets/dataset_2020_11_13.csv'),
+        # read_data('datasets/dataset_2021_03_05.csv'),
+        # read_data('datasets/dataset_2021_05_28.csv'),
+        # read_data('datasets/dataset_2021_08_27.csv')
     ]
     fig.add_trace(
         go.Bar(
-            x=PUBLISH_DATES[1:],
+            # x=PUBLISH_DATES[1:],
+            x=[d.date() for d in PUBLISH_DATES],
             # Change this last index to change the company size. Right now it's set at
             # 20 - 99 employees.
-            y=[bankruptcy_data[i][indices[index]][2] for i in range(1, 5)],
+            # y=[bankruptcy_data[i][indices[index]][2] for i in range(1, 5)],
+            y=[bankruptcy_data[i][indices[index]][2] for i in range(5)],
             name=f'%age of businesses bankrupt in {num_months[index]} month(s)'
         )
     )
 
     fig.update_layout(
         title='Positive Media Representation vs Time until Bankruptcy',
+        xaxis=dict(type='category'),
         yaxis={
             'title': 'Percentage'
         }
     )
 
-    fig.write_image(f'graph{months_until}.png', format='png')
+    fig.write_image(f'graphs/graph{months_until}.png', format='png')
 
 
 if __name__ == '__main__':
-    import python_ta
-    import python_ta.contracts
-    python_ta.contracts.DEBUG_CONTRACTS = False
-    python_ta.contracts.check_all_contracts()
-    python_ta.check_all(config={
-        'extra-imports': [
-            'python_ta.contracts',
-            'kaleido', 'csv',
-            'plotly.graph_objects',
-            'datetime',
-            'python_ta',
-            'filtration'
-        ],
-        'allowed-io': ['plotly.graph_objects.Figure.write_image', 'with', 'open'],
-        'max-line-length': 100,
-        'disable': ['R1705', 'C0200']
-    })
+    # import python_ta
+    # import python_ta.contracts
+    # python_ta.contracts.DEBUG_CONTRACTS = False
+    # python_ta.contracts.check_all_contracts()
+    # python_ta.check_all(config={
+    #     'extra-imports': [
+    #         'python_ta.contracts',
+    #         'kaleido', 'csv',
+    #         'plotly.graph_objects',
+    #         'datetime',
+    #         'python_ta',
+    #         'filtration'
+    #     ],
+    #     'allowed-io': ['plotly.graph_objects.Figure.write_image', 'with', 'open'],
+    #     'max-line-length': 100,
+    #     'disable': ['R1705', 'C0200']
+    # })
+    generate_graph(1)
