@@ -24,7 +24,8 @@ class Button:
     y: int
     width: int
     height: int
-    background_colour: tuple[int, int, int]
+    # TODO: add [int, int, int]
+    background_colour: tuple
     text: Optional[str] = None
 
 
@@ -60,13 +61,13 @@ class App:
     width, height = (800, 600)
     running = True
     state = 0
-    button_previous = Button(0, 0, 200, 50, (0, 0, 0), 'Previous')
-    button_next = Button(300, 0, 200, 50, (0, 0, 0), 'Next')
-    image_1 = Image(0, 100, 'graphs/graph1.png')
-    image_2 = Image(0, 100, 'graphs/graph3.png')
-    image_3 = Image(0, 100, 'graphs/graph6.png')
-    image_4 = Image(0, 100, 'graphs/graph12.png')
-    image_5 = Image(0, 100, 'graphs/graph999.png')
+    button_previous = Button(5, 545, 200, 50, (0, 0, 0), 'Previous')
+    button_next = Button(595, 545, 200, 50, (0, 0, 0), 'Next')
+    image_1 = Image(55, 0, 'graphs/graph1.png')
+    image_2 = Image(55, 0, 'graphs/graph3.png')
+    image_3 = Image(55, 0, 'graphs/graph6.png')
+    image_4 = Image(55, 0, 'graphs/graph12.png')
+    image_5 = Image(55, 0, 'graphs/graph999.png')
     font: pygame.font.SysFont
 
     def __init__(self) -> None:
