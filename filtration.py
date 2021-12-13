@@ -13,7 +13,7 @@ section(title, publish time, and body) of each article in the dataset using sort
 or sort_cbc, analyze each article title and article body's polarity score using polarity_analysis,
 and convert the publish times of articles in the dataset into datetime.datetime format. Lastly, the
 store_to_dataclass functions help gather all the filtered sections of the dataset and store them
-in a dataclass.
+in a dataclass. 
 
     This module contains one dataclass: FilteredDataset. Results from sort_cbc,
 sort_start_or_global, datetime_converter_star, datetime_converter_cbc, datetime_converter_global,
@@ -25,6 +25,15 @@ from dataclasses import dataclass
 import json
 import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
+# import ssl
+
+# try:
+#     _create_unverified_https_context = ssl._create_unverified_context
+# except AttributeError:
+#     pass
+# else:
+#     ssl._create_default_https_context = _create_unverified_https_context
+
 nltk.download("vader_lexicon")
 
 
@@ -276,11 +285,20 @@ def store_star_to_dataclass(file_name: str) -> FilteredDataset:
     preconditions:
     - file_name == 'dataset/the_star.json'
     """
-    the_star = FilteredDataset(sort_star_or_global(file_name)[0],
+    # the_star = FilteredDataset(sort_star_or_global(file_name)[0],
+    #                            datetime_converter_star(file_name),
+    #                            sort_star_or_global(file_name)[2],
+    #                            polarity_analysis(sort_star_or_global(file_name))[0],
+    #                            polarity_analysis(sort_star_or_global(file_name))[1]
+    #                            )
+    sorted_data = sort_star_or_global(file_name)
+    polarity = polarity_analysis(sorted_data)
+
+    the_star = FilteredDataset(sorted_data[0],
                                datetime_converter_star(file_name),
-                               sort_star_or_global(file_name)[2],
-                               polarity_analysis(sort_star_or_global(file_name))[0],
-                               polarity_analysis(sort_star_or_global(file_name))[1]
+                               sorted_data[2],
+                               polarity[0],
+                               polarity[1]
                                )
     return the_star
 
@@ -293,11 +311,21 @@ def store_global_to_dataclass(file_name: str) -> FilteredDataset:
     preconditions:
     - file_name == 'dataset/the_star.json'
     """
-    global_ = FilteredDataset(sort_star_or_global(file_name)[0],
+    # global_ = FilteredDataset(sort_star_or_global(file_name)[0],
+    #                           datetime_converter_global(file_name),
+    #                           sort_star_or_global(file_name)[2],
+    #                           polarity_analysis(sort_star_or_global(file_name))[0],
+    #                           polarity_analysis(sort_star_or_global(file_name))[1]
+    #                           )
+
+    sorted_data = sort_star_or_global(file_name)
+    polarity = polarity_analysis(sorted_data)
+
+    global_ = FilteredDataset(sorted_data[0],
                               datetime_converter_global(file_name),
-                              sort_star_or_global(file_name)[2],
-                              polarity_analysis(sort_star_or_global(file_name))[0],
-                              polarity_analysis(sort_star_or_global(file_name))[1]
+                              sorted_data[2],
+                              polarity[0],
+                              polarity[1]
                               )
     return global_
 
@@ -310,11 +338,21 @@ def store_cbc_to_dataclass(file_name: str) -> FilteredDataset:
     preconditions:
     - file_name == 'dataset/the_star.json'
     """
-    cbc = FilteredDataset(sort_cbc(file_name)[0],
+    # cbc = FilteredDataset(sort_cbc(file_name)[0],
+    #                       datetime_converter_cbc(file_name),
+    #                       sort_cbc(file_name)[2],
+    #                       polarity_analysis(sort_cbc(file_name))[0],
+    #                       polarity_analysis(sort_cbc(file_name))[1]
+    #                       )
+
+    sorted_data = sort_cbc(file_name)
+    polarity = polarity_analysis(sorted_data)
+
+    cbc = FilteredDataset(sorted_data[0],
                           datetime_converter_cbc(file_name),
-                          sort_cbc(file_name)[2],
-                          polarity_analysis(sort_cbc(file_name))[0],
-                          polarity_analysis(sort_cbc(file_name))[1]
+                          sorted_data[2],
+                          polarity[0],
+                          polarity[1]
                           )
     return cbc
 
@@ -322,14 +360,14 @@ def store_cbc_to_dataclass(file_name: str) -> FilteredDataset:
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-    import python_ta
-    import python_ta.contracts
-    python_ta.contracts.DEBUG_CONTRACTS = False
-    python_ta.contracts.check_all_contracts()
-    python_ta.check_all(config={
-        'extra-imports': ['nltk', 'json', 'dataclass', 'python_ta.contracts',
-                          'python_ta', 'doctest', ],
-        'allowed-io': ['read_file', 'sort_star_or_global', 'sort_cbc'],
-        'max-line-length': 100,
-        'disable': ['R1705', 'C0200']
-    })
+    # import python_ta
+    # import python_ta.contracts
+    # python_ta.contracts.DEBUG_CONTRACTS = False
+    # python_ta.contracts.check_all_contracts()
+    # python_ta.check_all(config={
+    #     'extra-imports': ['nltk', 'json', 'dataclass', 'python_ta.contracts',
+    #                       'python_ta', 'doctest', ],
+    #     'allowed-io': ['read_file', 'sort_star_or_global', 'sort_cbc'],
+    #     'max-line-length': 100,
+    #     'disable': ['R1705', 'C0200']
+    # })

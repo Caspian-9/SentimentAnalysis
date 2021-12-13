@@ -23,9 +23,9 @@ PUBLISH_DATES = [
     datetime.datetime(2021, 8, 27)
 ]
 
-CBC = f.store_cbc_to_dataclass('datasets/articles.json')
-GLOBAL = f.store_global_to_dataclass('datasets/global.json')
-STAR = f.store_star_to_dataclass('datasets/the_star.json')
+CBC = f.store_cbc_to_dataclass('dataset/articles.json')
+GLOBAL = f.store_global_to_dataclass('dataset/global.json')
+STAR = f.store_star_to_dataclass('dataset/the_star.json')
 
 
 def get_avg_polarity_for_day(day: datetime.datetime, data: f.FilteredDataset) -> tuple[int, int]:
@@ -63,11 +63,12 @@ def read_data(file: str) -> list[list[float]]:
     filtered_data = [[], [], [], [], []]
 
     # Since the datasets have different formats -_-
-    if file in {'datasets/july_2020.csv', 'datasets/nov_2020.csv'}:
-        position = 11
-    else:
-        position = 12
-    # position = 11
+    # if file in {'dataset/july_2020.csv', 'dataset/nov_2020.csv'}:
+    # if file in {'dataset/dataset_2020_07_14.csv', 'dataset/dataset_2020_11_13.csv'}:
+    #     position = 11
+    # else:
+    #     position = 12
+    position = 11
 
     with open(file) as csv_file:
         data = csv.reader(csv_file)
@@ -111,6 +112,7 @@ def get_percentage_for_quarter(quarter: int) -> float:
         total_pos += day_positive
         total_articles += day_articles
 
+
     return total_pos / total_articles * 100
 
 
@@ -150,16 +152,16 @@ def generate_graph(months_until: int) -> None:
         ))
 
     bankruptcy_data = [
-        read_data('datasets/july_2020.csv'),
-        read_data('datasets/nov_2020.csv'),
-        read_data('datasets/first_quarter.csv'),
-        read_data('datasets/second_quarter.csv'),
-        read_data('datasets/third_quarter.csv')
-        # read_data('datasets/dataset_2020_07_14.csv'),
-        # read_data('datasets/dataset_2020_11_13.csv'),
-        # read_data('datasets/dataset_2021_03_05.csv'),
-        # read_data('datasets/dataset_2021_05_28.csv'),
-        # read_data('datasets/dataset_2021_08_27.csv')
+        # read_data('dataset/july_2020.csv'),
+        # read_data('dataset/nov_2020.csv'),
+        # read_data('dataset/first_quarter.csv'),
+        # read_data('dataset/second_quarter.csv'),
+        # read_data('dataset/third_quarter.csv')
+        read_data('dataset/dataset_2020_07_14.csv'),
+        read_data('dataset/dataset_2020_11_13.csv'),
+        read_data('dataset/dataset_2021_03_05.csv'),
+        read_data('dataset/dataset_2021_05_28.csv'),
+        read_data('dataset/dataset_2021_08_27.csv')
     ]
     fig.add_trace(
         go.Bar(
@@ -175,13 +177,13 @@ def generate_graph(months_until: int) -> None:
 
     fig.update_layout(
         title='Positive Media Representation vs Time until Bankruptcy',
-        xaxis=dict(type='category'),
+        xaxis=dict(type = 'category'),
         yaxis={
             'title': 'Percentage'
         }
     )
 
-    fig.write_image(f'graphs/graph{months_until}.png', format='png')
+    fig.write_image(f'graph{months_until}.png', format='png')
 
 
 if __name__ == '__main__':
@@ -203,3 +205,7 @@ if __name__ == '__main__':
     #     'disable': ['R1705', 'C0200']
     # })
     generate_graph(1)
+    generate_graph(3)
+    generate_graph(6)
+    generate_graph(12)
+    generate_graph(999)
