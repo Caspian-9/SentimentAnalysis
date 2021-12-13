@@ -24,8 +24,7 @@ class Button:
     y: int
     width: int
     height: int
-    # TODO: add [int, int, int]
-    background_colour: tuple
+    background_colour: tuple[int, int, int]
     text: Optional[str] = None
 
 
