@@ -62,11 +62,11 @@ class App:
     state = 0
     button_previous = Button(5, 545, 200, 50, (0, 0, 0), 'Previous')
     button_next = Button(595, 545, 200, 50, (0, 0, 0), 'Next')
-    image_1 = Image(55, 0, 'graphs/graph1.png')
-    image_2 = Image(55, 0, 'graphs/graph3.png')
-    image_3 = Image(55, 0, 'graphs/graph6.png')
-    image_4 = Image(55, 0, 'graphs/graph12.png')
-    image_5 = Image(55, 0, 'graphs/graph999.png')
+    image_1 = Image(55, 0, 'graph1.png')
+    image_2 = Image(55, 0, 'graph3.png')
+    image_3 = Image(55, 0, 'graph6.png')
+    image_4 = Image(55, 0, 'graph12.png')
+    image_5 = Image(55, 0, 'graph999.png')
     font: pygame.font.SysFont
 
     def __init__(self) -> None:
