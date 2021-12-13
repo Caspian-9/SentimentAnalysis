@@ -60,8 +60,8 @@ class App:
     width, height = (800, 600)
     running = True
     state = 0
-    button_previous = Button(5, 545, 200, 50, (0, 0, 0), 'Previous')
-    button_next = Button(595, 545, 200, 50, (0, 0, 0), 'Next')
+    button_previous = Button(5, 545, 200, 50, (102, 0, 204), 'Previous')
+    button_next = Button(595, 545, 200, 50, (102, 0, 204), 'Next')
     image_1 = Image(55, 0, 'graph1.png')
     image_2 = Image(55, 0, 'graph3.png')
     image_3 = Image(55, 0, 'graph6.png')
