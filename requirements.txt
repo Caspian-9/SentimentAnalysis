@@ -11,3 +11,4 @@ nltk
 # Graphics and data visualization
 plotly
 pygame
+kaleido
