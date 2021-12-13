@@ -64,11 +64,11 @@ def read_data(file: str) -> list[list[float]]:
 
     # Since the datasets have different formats -_-
     # if file in {'dataset/july_2020.csv', 'dataset/nov_2020.csv'}:
-    # if file in {'dataset/dataset_2020_07_14.csv', 'dataset/dataset_2020_11_13.csv'}:
-    #     position = 11
-    # else:
-    #     position = 12
-    position = 11
+    if file in {'dataset/dataset_2020_07_14.csv', 'dataset/dataset_2020_11_13.csv'}:
+        position = 11
+    else:
+        position = 12
+    # position = 11
 
     with open(file) as csv_file:
         data = csv.reader(csv_file)
