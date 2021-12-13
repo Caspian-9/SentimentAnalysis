@@ -62,11 +62,11 @@ class App:
     state = 0
     button_previous = Button(0, 0, 200, 50, (0, 0, 0), 'Previous')
     button_next = Button(300, 0, 200, 50, (0, 0, 0), 'Next')
-    image_1 = Image(0, 100, 'graph1.png')
-    image_2 = Image(0, 100, 'graph3.png')
-    image_3 = Image(0, 100, 'graph6.png')
-    image_4 = Image(0, 100, 'graph12.png')
-    image_5 = Image(0, 100, 'graph999.png')
+    image_1 = Image(0, 100, 'graphs/graph1.png')
+    image_2 = Image(0, 100, 'graphs/graph3.png')
+    image_3 = Image(0, 100, 'graphs/graph6.png')
+    image_4 = Image(0, 100, 'graphs/graph12.png')
+    image_5 = Image(0, 100, 'graphs/graph999.png')
     font: pygame.font.SysFont
 
     def __init__(self) -> None:
@@ -77,6 +77,12 @@ class App:
         pygame.init()
         pygame.font.init()
         self.font = pygame.font.SysFont('Corbel', 24)
+        # generate graphs
+        g.generate_graph(1)
+        g.generate_graph(3)
+        g.generate_graph(6)
+        g.generate_graph(12)
+        g.generate_graph(999)
 
     def run(self) -> None:
         """
@@ -89,12 +95,6 @@ class App:
         pygame.display.set_caption('CS Final Project')
         screen.fill(self.background_colour)
         pygame.display.flip()
-
-        g.generate_graph(1)
-        g.generate_graph(3)
-        g.generate_graph(6)
-        g.generate_graph(12)
-        g.generate_graph(999)
 
         while self.running:
             for event in pygame.event.get():
