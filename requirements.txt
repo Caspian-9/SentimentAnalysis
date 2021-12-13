@@ -1,0 +1,13 @@
+requirements.txt
+# CSC110: Reality of Media Reports on Small Businesses under COVID-19
+# Python libraries will be using for this project.
+
+# Data gathering
+scrapy
+
+# Text-analysis to filter the articles
+nltk
+
+# Graphics and data visualization
+plotly
+pygame
