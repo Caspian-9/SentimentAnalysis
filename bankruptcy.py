@@ -86,20 +86,6 @@ def read_csv_data(file: str) -> list[CSV_Item]:
                     csv_data.append(item)
 
     return csv_data
-    
-
-# def filter_csv_data_by_employee(data: list[CSV_Item]) -> list[CSV_Item]:
-#     """
-#     Returns a list of csv items with its "geo" field being "Canada" and "business characteristics" 
-#     field ends with keywords "employees"
-
-#     Preconditions:
-#     - data != []
-#     """
-#     filtered_data = [item for item in data if (item.geo == "Canada" and 
-#                                                 item.business_char.endswith("employees"))]
-
-#     return filtered_data
 
 
 def bankruptcy_value(data: list[CSV_Item], time_length: str, employee_size: str) -> float:
@@ -107,13 +93,13 @@ def bankruptcy_value(data: list[CSV_Item], time_length: str, employee_size: str)
     Returns the bankruptcy percentage value of the item with given time_length and employee_size
 
     Preconditions:
-    - data != []
-    - time_length in LENGTH_OF_TIME_STR
-    - employee_size in EMPLOYEE_SIZE
+        - data != []
+        - time_length in LENGTH_OF_TIME_STR
+        - employee_size in EMPLOYEE_SIZE
     """
 
     items = [item for item in data if (employee_size in item.business_char and
-                                       time_length in item.Length_of_time)]
+                                       time_length in item.Length_of_time.lower())]
  
     # some csv files may have more than 1 row per per employee size per bankcruptcy length
     # of time, we only use the first row's value
