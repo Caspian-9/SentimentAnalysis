@@ -55,7 +55,9 @@ class App:
     - height: The height of the screen
     - running: Whether the app is running or not
     - state: Determines which graph in the current mode should be shown
-    - time_mode: Whether 
+    - time_mode: Whether the user can change between different times until bankruptcy or
+                 different numbers of employees. True = change time. False = change number
+                 of employees
     - button: A button to be displayed on the screen
     - font: A default font for text rendering
     """
