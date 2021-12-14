@@ -58,8 +58,6 @@ def get_percentage_for_quarter(quarter: int) -> float:
     Preconditions:
     - quarter in range(0, 5)
     """
-    total_pos = 0
-    total_articles = 0
 
     if quarter == 0:
         start_date = datetime.datetime(2020, 1, 1)
@@ -72,12 +70,10 @@ def get_percentage_for_quarter(quarter: int) -> float:
     star_articles = get_avg_polarity(start_date, end_date, STAR)
     cbc_articles = get_avg_polarity(start_date, end_date, CBC)
 
-    day_positive = global_articles[0] + star_articles[0] + cbc_articles[0]
-    day_articles = global_articles[1] + star_articles[1] + cbc_articles[1]
-    total_pos += day_positive
-    total_articles += day_articles
+    total_positive = global_articles[0] + star_articles[0] + cbc_articles[0]
+    total_articles = global_articles[1] + star_articles[1] + cbc_articles[1]
 
-    return total_pos / total_articles * 100
+    return total_positive / total_articles * 100
 
 
 def generate_graph(time_ind: int, size_ind: int) -> str:
