@@ -54,7 +54,8 @@ class App:
     - width: The width of the screen
     - height: The height of the screen
     - running: Whether the app is running or not
-    - state: Determines which graph should be shown, is either 1 or 0
+    - state: Determines which graph in the current mode should be shown
+    - time_mode: Whether 
     - button: A button to be displayed on the screen
     - font: A default font for text rendering
     """
@@ -83,11 +84,13 @@ class App:
 
         # generate graphs for different lengths of time until bankruptcy
         for i in range(len(b.LENGTH_OF_TIME_STR)):
+            # fix employee size = 20-99 employees
             img_name = g.generate_graph(i, 2)
             self.image_list_by_time.append(Image(55, 0, img_name))
 
         #generate graphs for different numbers of employees
         for i in range(len(b.EMPLOYEE_SIZE)):
+            # fix time until bankruptcy to 6-12 months
             img_name = g.generate_graph(3, i)
             self.image_list_by_employee.append(Image(55, 0, img_name))
 

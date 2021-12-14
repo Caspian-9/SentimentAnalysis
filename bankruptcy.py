@@ -59,7 +59,6 @@ def read_csv_data(file: str) -> list[CSV_Item]:
 
     with open(file) as csv_file:
         data = csv.DictReader(csv_file)
-        # print(data.fieldnames)
        
         # the length of time field has different name in different csv files, one of them 
         # is "Length of time", the other is very long but also starts with "Length of time",
@@ -93,16 +92,16 @@ def bankruptcy_value(data: list[CSV_Item], time_length: str, employee_size: str)
     Returns the bankruptcy percentage value of the item with given time_length and employee_size
 
     Preconditions:
-        - data != []
-        - time_length in LENGTH_OF_TIME_STR
-        - employee_size in EMPLOYEE_SIZE
+    - data != []
+    - time_length in LENGTH_OF_TIME_STR
+    - employee_size in EMPLOYEE_SIZE
     """
 
     items = [item for item in data if (employee_size in item.business_char and
                                        time_length in item.Length_of_time.lower())]
  
-    # some csv files may have more than 1 row per per employee size per bankcruptcy length
-    # of time, we only use the first row's value
+    # some csv files may have more than 1 row per per employee size per length of time
+    # until bankruptcy, we only use the first row's value
     if items:
         return items[0].value
     else:
