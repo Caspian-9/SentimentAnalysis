@@ -12,14 +12,7 @@ class CSV_Item:
     Length_of_time: str     # Length of time business can continue to operate
     value: float            # percentage
 
-# LENGTH_OF_TIME_STR = [
-#     "less than 1 month",
-#     "less than 3 months",
-#     "less than 6 months",
-#     "less than 12 months",
-#     "12 months or more",
-#     "unknown"
-# ]
+
 LENGTH_OF_TIME_STR = [
     "less than 1 month",
     "1 month to less than 3 months",
@@ -36,7 +29,8 @@ EMPLOYEE_SIZE = [
 ]
 
 
-def load_data():
+def load_data() -> list[list[CSV_Item]]:
+    """Load data from csv files"""
     csv_data = [
         read_csv_data('dataset/dataset_2020_07_14.csv'),
         read_csv_data('dataset/dataset_2020_11_13.csv'),
