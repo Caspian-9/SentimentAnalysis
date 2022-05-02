@@ -1,5 +1,5 @@
-# csc110-project
+# Media Articles Sentiment Analysis with NLTK and Vader Lexicon
 
-download the CSC110_Project folder and mark it as Sources Root in Pycharm
+put all the files in a folder and mark the folder as Sources Root in Pycharm
 
-run \_\_init\_\_.py in Python console to run the code
+run main.py to run the program
