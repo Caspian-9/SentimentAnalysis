@@ -36,6 +36,25 @@ from nltk.sentiment import SentimentIntensityAnalyzer
 
 nltk.download("vader_lexicon")
 
+BUSINESS_TERMS = ['business', 'company', 'money', 'bank', 'tax', 'income',
+                  'sales', 'employees', 'shop', 'market']
+
+# TODO: ADD DATETIME STUFF LUL
+KEYWORDS = {'cbc': {'file_name': 'dataset/cbc.json',
+                    'body_key': 'description',
+                    'business_terms': BUSINESS_TERMS[:-2]},
+            'global': {'file_name': 'dataset/global.json',
+                       'body_key': 'body',
+                       'business_terms': BUSINESS_TERMS},
+            'star': {'file_name': 'dataset/the_star.json',
+                     'body_key': 'body',
+                     'business_terms': BUSINESS_TERMS}
+            }
+
+# ONLY load_business_data() can modify this global variable
+BUSINESS_DATA = {}
+# format: BUSINESS_DATA = {'cbc': find_business('cbc'), ...}
+
 
 def read_file(file_name: str) -> list[dict[str, str]]:
     """
@@ -43,7 +62,7 @@ def read_file(file_name: str) -> list[dict[str, str]]:
 
     preconditions:
     - file_name in ['dataset/the_star.json', 'dataset/global.json',
-    'dataset/articles.json']
+    'dataset/cbc.json']
     """
     with open(file_name) as file:
         storage = json.load(file)
@@ -51,80 +70,87 @@ def read_file(file_name: str) -> list[dict[str, str]]:
     return storage
 
 
-def find_business_star_global(file_name: str) -> list[dict[str, str]]:
+def load_business_data() -> None:
+    """read all the businesses' data from their respective json files
+       save the data in the BUSINESS_DATA global variable
+
+       Must be called before sort_articles or store_to_dataclass, or else BUSINESS_DATA is empty
+       """
+    for x in KEYWORDS:
+        BUSINESS_DATA[x] = find_business(x)
+
+
+def find_business(source: str) -> list[dict[str, str]]:
     """filter the articles that are related to business and add them to business_articles
 
-    preconditions:
-    - file_name in ['dataset/the_star.json', 'dataset/global.json']
+        preconditions:
+        - file_name in ['dataset/the_star.json', 'dataset/global.json', 'dataset/cbc.json']
+        - body_keyword in ['body', 'description']
+
+        cbc articles need to use 'description' as the body_keyword. star and global use 'body'
     """
-    business_terms = ['business', 'company', 'money', 'bank', 'tax', 'income',
-                      'sales', 'employees']
     business_articles = []
+
+    file_name = KEYWORDS[source]['file_name']
+    body_key = KEYWORDS[source]['body_key']
+    business_terms = KEYWORDS[source]['business_terms']
+
     for article in read_file(file_name):
-        if any(x in article['title'].lower() or x in article['body'].lower()
-               for x in business_terms):
-            business_articles.append(article)
+        for term in business_terms:
+            if term in article['title'].lower() or term in article[body_key].lower():
+                business_articles.append(article)
+                break
 
     return business_articles
 
 
-def find_business_cbc(file_name: str) -> list[dict[str, str]]:
+# def find_business_star_global(file_name: str) -> list[dict[str, str]]:
+#     """filter the articles that are related to business and add them to business_articles
+#
+#     preconditions:
+#     - file_name in ['dataset/the_star.json', 'dataset/global.json']
+#     """
+#     business_terms = ['business', 'company', 'money', 'bank', 'tax', 'income',
+#                       'sales', 'employees']
+#     business_articles = []
+#     for article in read_file(file_name):
+#         if any(x in article['title'].lower() or x in article['body'].lower()
+#                for x in business_terms):
+#             business_articles.append(article)
+#
+#     return business_articles
+#
+#
+# def find_business_cbc(file_name: str) -> list[dict[str, str]]:
+#     """
+#     filter the articles that are related to business and add them to business_articles.
+#     This dataset used a different function than sort_star_or_global since
+#     the key corresponding to the article body for each article dictionary in
+#     'dataset/articles.json' is 'description' instead of 'body'.
+#     Using a single sort_dataset function for all three datasets will raise key error.
+#
+#     preconditions:
+#     - file_name == 'dataset/articles.json'
+#     """
+#     business_terms = ['business', 'company', 'money', 'bank', 'tax', 'income',
+#                       'sales', 'employees', 'shop', 'market']
+#     business_articles = []
+#     for article in read_file(file_name):
+#         if any(x in article['title'].lower() or x in article['description'].lower()
+#                for x in business_terms):
+#             business_articles.append(article)
+#
+#     return business_articles
+
+
+def sort_articles(source: str) -> tuple[list[str], list[str], list[str]]:
     """
-    filter the articles that are related to business and add them to business_articles.
-    This dataset used a different function than sort_star_or_global since
-    the key corresponding to the article body for each article dictionary in
-    'dataset/articles.json' is 'description' instead of 'body'.
-    Using a single sort_dataset function for all three datasets will raise key error.
-
-    preconditions:
-    - file_name == 'dataset/articles.json'
-    """
-    business_terms = ['business', 'company', 'money', 'bank', 'tax', 'income',
-                      'sales', 'employees', 'shop', 'market']
-    business_articles = []
-    for article in read_file(file_name):
-        if any(x in article['title'].lower() or x in article['description'].lower()
-               for x in business_terms):
-            business_articles.append(article)
-
-    return business_articles
-
-
-def sort_star_or_global(file_name: str) -> tuple[list[str], list[str], list[str]]:
-    """
-    Sort the given dataset's(the_star.json or global.json) data into three sections:
+    Sort the given dataset's data into three sections:
     titles, publish dates, and bodies.
 
     preconditions:
-    - file_name in ['dataset/the_star.json', 'dataset/global.json']
-    """
-    # ACCUMULATOR titles: keep track of the articles' titles in
-    # the given dataset sorted so far
-    titles = []
-
-    # ACCUMULATOR publish_dates: keep track of the articles' publish dates in
-    # the given dataset sorted so far
-    publish_dates = []
-
-    # ACCUMULATOR bodies: keep track of the articles' bodies in
-    # the given dataset sorted so far
-    bodies = []
-
-    for article in find_business_star_global(file_name):
-        titles.append(article['title'])
-        publish_dates.append(article['publish_time'])
-        bodies.append(article['body'])
-
-    return titles, publish_dates, bodies
-
-
-def sort_cbc(file_name: str) -> tuple[list[str], list[str], list[str]]:
-    """
-    Sort 'dataset/articles.json''s data into three sections:
-    titles, publish dates, and bodies.
-
-    preconditions:
-    - file_name == 'dataset/articles.json'
+    - file_name in ['dataset/the_star.json', 'dataset/global.json', 'dataset/cbc.json']
+    - body_keyword in ['body', 'description']
     """
     # ACCUMULATOR titles: keep track of the articles' titles in
     # 'dataset/article.json' sorted so far
@@ -138,12 +164,70 @@ def sort_cbc(file_name: str) -> tuple[list[str], list[str], list[str]]:
     # 'dataset/article.json' sorted so far
     bodies = []
 
-    for article in find_business_cbc(file_name):
+    body_key = KEYWORDS[source]['body_key']
+
+    for article in BUSINESS_DATA[source]:
         titles.append(article['title'])
         publish_dates.append(article['publish_time'])
-        bodies.append(article['description'])
+        bodies.append(article[body_key])
 
     return titles, publish_dates, bodies
+
+
+# def sort_star_or_global(file_name: str) -> tuple[list[str], list[str], list[str]]:
+#     """
+#     Sort the given dataset's(the_star.json or global.json) data into three sections:
+#     titles, publish dates, and bodies.
+#
+#     preconditions:
+#     - file_name in ['dataset/the_star.json', 'dataset/global.json']
+#     """
+#     # ACCUMULATOR titles: keep track of the articles' titles in
+#     # the given dataset sorted so far
+#     titles = []
+#
+#     # ACCUMULATOR publish_dates: keep track of the articles' publish dates in
+#     # the given dataset sorted so far
+#     publish_dates = []
+#
+#     # ACCUMULATOR bodies: keep track of the articles' bodies in
+#     # the given dataset sorted so far
+#     bodies = []
+#
+#     for article in find_business(file_name, 'body'):
+#         titles.append(article['title'])
+#         publish_dates.append(article['publish_time'])
+#         bodies.append(article['body'])
+#
+#     return titles, publish_dates, bodies
+#
+#
+# def sort_cbc(file_name: str) -> tuple[list[str], list[str], list[str]]:
+#     """
+#     Sort 'dataset/articles.json''s data into three sections:
+#     titles, publish dates, and bodies.
+#
+#     preconditions:
+#     - file_name == 'dataset/articles.json'
+#     """
+#     # ACCUMULATOR titles: keep track of the articles' titles in
+#     # 'dataset/article.json' sorted so far
+#     titles = []
+#
+#     # ACCUMULATOR publish_dates: keep track of the articles' publish dates in
+#     # 'dataset/article.json' sorted so far
+#     publish_dates = []
+#
+#     # ACCUMULATOR bodies: keep track of the articles' bodies in
+#     # 'dataset/article.json' sorted so far
+#     bodies = []
+#
+#     for article in find_business(file_name, 'description'):
+#         titles.append(article['title'])
+#         publish_dates.append(article['publish_time'])
+#         bodies.append(article['description'])
+#
+#     return titles, publish_dates, bodies
 
 
 def polarity_analysis(sorted_data: tuple[list[str], list[str], list[str]]) -> \
@@ -171,83 +255,133 @@ def polarity_analysis(sorted_data: tuple[list[str], list[str], list[str]]) -> \
     return title_score_tracker, body_score_tracker
 
 
-def datetime_converter_cbc(file_name: str) -> list[datetime.datetime]:
-    """Convert the raw publish date data in the CBC dataset to datetime.datetime format.
+def datetime_converter(source: str) -> list[datetime.datetime]:
+    """Convert the raw publish date data in the source dataset to datetime.datetime format.
 
-    preconditions
-    - file_name == 'dataset/articles.json'
+        preconditions
+        - source in ['cbc', 'global', 'star']
     """
-    # ACCUMULATOR date_times_cbc: keep track of the publish times in datetime.datetime
-    # format for all CBC business articles
-    date_times_cbc = []
 
-    for article in find_business_cbc(file_name):
-        raw_date = article['publish_time']
-        year = int(raw_date[0:4])
-        month = int(raw_date[5: 7])
-        day = int(raw_date[8: 10])
-        date_time = datetime.datetime(year, month, day)
-        date_times_cbc.append(date_time)
-
-    return date_times_cbc
-
-
-def datetime_converter_star(file_name: str) -> list[datetime.datetime]:
-    """Convert the raw publish date data in the the Star dataset to datetime.datetime
-    format.
-
-    preconditions
-    - file_name == 'dataset/the_star.json'
-    """
     month_num = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
                  'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}
 
-    # ACCUMULATOR date_times_star: keep track of the publish times in datetime.datetime
-    # format for all the Star business articles
-    date_times_star = []
+    # ACCUMULATOR date_times: keep track of the publish times in datetime.datetime
+    # format for all the source business articles
+    date_times = []
 
-    for article in find_business_star_global(file_name):
-        raw_date = article['publish_time']
-        year = int(raw_date[14: 19])
-        month = month_num[str(raw_date[6: 9])]
-        if raw_date[12].isnumeric():
-            day = int(raw_date[11: 13])
-        else:
-            day = int(raw_date[11])
-        date_time = datetime.datetime(year, month, day)
-        date_times_star.append(date_time)
+    # TODO: NEED CLEANUP
+    if source == 'cbc':
+        for article in BUSINESS_DATA[source]:
+            raw_date = article['publish_time']
+            year = int(raw_date[0:4])
+            month = int(raw_date[5: 7])
+            day = int(raw_date[8: 10])
+            date_time = datetime.datetime(year, month, day)
+            date_times.append(date_time)
 
-    return date_times_star
+    elif source == 'global':
+        for article in BUSINESS_DATA[source]:
+            raw_date = article['publish_time']
+            split_lst = str.split(raw_date, ' ')
+            year = int(split_lst[3])
+            raw_month = split_lst[1]
+            short_month = raw_month[0: 3]
+            month = month_num[str(short_month)]
+            raw_day = split_lst[2]
+            raw_day_lst = list(raw_day)
+            raw_day_lst.remove(',')
+            day = int(''.join(raw_day_lst))
+            date_time = datetime.datetime(year, month, day)
+            date_times.append(date_time)
+
+    else:    # source == 'star'
+        for article in BUSINESS_DATA[source]:
+            raw_date = article['publish_time']
+            year = int(raw_date[14: 19])
+            month = month_num[str(raw_date[6: 9])]
+            if raw_date[12].isnumeric():
+                day = int(raw_date[11: 13])
+            else:
+                day = int(raw_date[11])
+            date_time = datetime.datetime(year, month, day)
+            date_times.append(date_time)
+
+    return date_times
 
 
-def datetime_converter_global(file_name: str) -> list[datetime.datetime]:
-    """Convert the raw publish date data in the CBC dataset to datetime.datetime format.
-
-    preconditions
-    - file_name == 'dataset/articles.json'
-    """
-    month_num = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
-                 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}
-
-    # ACCUMULATOR date_times_global: keep track of the publish times in datetime.datetime
-    # format for all Global business articles
-    date_times_global = []
-
-    for article in find_business_star_global(file_name):
-        raw_date = article['publish_time']
-        split_lst = str.split(raw_date, ' ')
-        year = int(split_lst[3])
-        raw_month = split_lst[1]
-        short_month = raw_month[0: 3]
-        month = month_num[str(short_month)]
-        raw_day = split_lst[2]
-        raw_day_lst = list(raw_day)
-        raw_day_lst.remove(',')
-        day = int(''.join(raw_day_lst))
-        date_time = datetime.datetime(year, month, day)
-        date_times_global.append(date_time)
-
-    return date_times_global
+# def datetime_converter_cbc(file_name: str) -> list[datetime.datetime]:
+#     """Convert the raw publish date data in the CBC dataset to datetime.datetime format.
+#
+#     preconditions
+#     - file_name == 'dataset/cbc.json'
+#     """
+#     # ACCUMULATOR date_times_cbc: keep track of the publish times in datetime.datetime
+#     # format for all CBC business articles
+#     date_times_cbc = []
+#
+#     for article in find_business('cbc'):
+#         raw_date = article['publish_time']
+#         year = int(raw_date[0:4])
+#         month = int(raw_date[5: 7])
+#         day = int(raw_date[8: 10])
+#         date_time = datetime.datetime(year, month, day)
+#         date_times_cbc.append(date_time)
+#
+#     return date_times_cbc
+#
+#
+# def datetime_converter_star(file_name: str) -> list[datetime.datetime]:
+#     """Convert the raw publish date data in the the Star dataset to datetime.datetime
+#     format.
+#
+#     preconditions
+#     - file_name == 'dataset/the_star.json'
+#     """
+#
+#     # ACCUMULATOR date_times_star: keep track of the publish times in datetime.datetime
+#     # format for all the Star business articles
+#     date_times_star = []
+#
+#     for article in find_business('star'):
+#         raw_date = article['publish_time']
+#         year = int(raw_date[14: 19])
+#         month = MONTH_NUM[str(raw_date[6: 9])]
+#         if raw_date[12].isnumeric():
+#             day = int(raw_date[11: 13])
+#         else:
+#             day = int(raw_date[11])
+#         date_time = datetime.datetime(year, month, day)
+#         date_times_star.append(date_time)
+#
+#     return date_times_star
+#
+#
+# def datetime_converter_global(file_name: str) -> list[datetime.datetime]:
+#     """Convert the raw publish date data in the CBC dataset to datetime.datetime format.
+#
+#     preconditions
+#     - file_name == 'dataset/cbc.json'
+#     """
+#
+#     # ACCUMULATOR date_times_global: keep track of the publish times in datetime.datetime
+#     # format for all Global business articles
+#     date_times_global = []
+#
+#     for article in find_business('global'):
+#         raw_date = article['publish_time']
+#         split_lst = str.split(raw_date, ' ')
+#         year = int(split_lst[3])
+#         raw_month = split_lst[1]
+#         short_month = raw_month[0: 3]
+#         month = MONTH_NUM[str(short_month)]
+#         raw_day = split_lst[2]
+#         raw_day_lst = list(raw_day)
+#         raw_day_lst.remove(',')
+#         day = int(''.join(raw_day_lst))
+#         date_time = datetime.datetime(year, month, day)
+#         date_times_global.append(date_time)
+#
+#     return date_times_global
 
 
 @dataclass
@@ -277,7 +411,7 @@ class FilteredDataset:
     body_polarity_scores: list[dict[str: float]]
 
 
-def store_star_to_dataclass(file_name: str) -> FilteredDataset:
+def store_to_dataclass(source: str) -> FilteredDataset:
     """Store all filtered sections of the given dataset into a FilteredDataset class, such filtered
     sections include: titles, datetime.datetime publish dates, bodies, title polarity scores, and
     body polarity scores.
@@ -285,76 +419,90 @@ def store_star_to_dataclass(file_name: str) -> FilteredDataset:
     preconditions:
     - file_name == 'dataset/the_star.json'
     """
-    # the_star = FilteredDataset(sort_star_or_global(file_name)[0],
-    #                            datetime_converter_star(file_name),
-    #                            sort_star_or_global(file_name)[2],
-    #                            polarity_analysis(sort_star_or_global(file_name))[0],
-    #                            polarity_analysis(sort_star_or_global(file_name))[1]
-    #                            )
-    sorted_data = sort_star_or_global(file_name)
+
+    sorted_data = sort_articles(source)
     polarity = polarity_analysis(sorted_data)
 
-    the_star = FilteredDataset(sorted_data[0],
-                               datetime_converter_star(file_name),
-                               sorted_data[2],
-                               polarity[0],
-                               polarity[1]
-                               )
-    return the_star
+    filtered_data = FilteredDataset(sorted_data[0],
+                                    datetime_converter(source),
+                                    sorted_data[2],
+                                    polarity[0],
+                                    polarity[1]
+                                    )
+    return filtered_data
 
 
-def store_global_to_dataclass(file_name: str) -> FilteredDataset:
-    """Store all filtered sections of the given dataset into a FilteredDataset class, such filtered
-    sections include: titles, datetime.datetime publish dates, bodies, title polarity scores, and
-    body polarity scores.
-
-    preconditions:
-    - file_name == 'dataset/the_star.json'
-    """
-    # global_ = FilteredDataset(sort_star_or_global(file_name)[0],
-    #                           datetime_converter_global(file_name),
-    #                           sort_star_or_global(file_name)[2],
-    #                           polarity_analysis(sort_star_or_global(file_name))[0],
-    #                           polarity_analysis(sort_star_or_global(file_name))[1]
-    #                           )
-
-    sorted_data = sort_star_or_global(file_name)
-    polarity = polarity_analysis(sorted_data)
-
-    global_ = FilteredDataset(sorted_data[0],
-                              datetime_converter_global(file_name),
-                              sorted_data[2],
-                              polarity[0],
-                              polarity[1]
-                              )
-    return global_
-
-
-def store_cbc_to_dataclass(file_name: str) -> FilteredDataset:
-    """Store all filtered sections of the given dataset into a FilteredDataset class, such filtered
-    sections include: titles, datetime.datetime publish dates, bodies, title polarity scores, and
-    body polarity scores.
-
-    preconditions:
-    - file_name == 'dataset/the_star.json'
-    """
-    # cbc = FilteredDataset(sort_cbc(file_name)[0],
-    #                       datetime_converter_cbc(file_name),
-    #                       sort_cbc(file_name)[2],
-    #                       polarity_analysis(sort_cbc(file_name))[0],
-    #                       polarity_analysis(sort_cbc(file_name))[1]
-    #                       )
-
-    sorted_data = sort_cbc(file_name)
-    polarity = polarity_analysis(sorted_data)
-
-    cbc = FilteredDataset(sorted_data[0],
-                          datetime_converter_cbc(file_name),
-                          sorted_data[2],
-                          polarity[0],
-                          polarity[1]
-                          )
-    return cbc
+# def store_star_to_dataclass(file_name: str) -> FilteredDataset:
+#     """Store all filtered sections of the given dataset into a FilteredDataset class, such filtered
+#     sections include: titles, datetime.datetime publish dates, bodies, title polarity scores, and
+#     body polarity scores.
+#
+#     preconditions:
+#     - file_name == 'dataset/the_star.json'
+#     """
+#
+#     sorted_data = sort_articles('star')
+#     polarity = polarity_analysis(sorted_data)
+#
+#     the_star = FilteredDataset(sorted_data[0],
+#                                datetime_converter_star(file_name),
+#                                sorted_data[2],
+#                                polarity[0],
+#                                polarity[1]
+#                                )
+#     return the_star
+#
+#
+# def store_global_to_dataclass(file_name: str) -> FilteredDataset:
+#     """Store all filtered sections of the given dataset into a FilteredDataset class, such filtered
+#     sections include: titles, datetime.datetime publish dates, bodies, title polarity scores, and
+#     body polarity scores.
+#
+#     preconditions:
+#     - file_name == 'dataset/the_star.json'
+#     """
+#     # global_ = FilteredDataset(sort_star_or_global(file_name)[0],
+#     #                           datetime_converter_global(file_name),
+#     #                           sort_star_or_global(file_name)[2],
+#     #                           polarity_analysis(sort_star_or_global(file_name))[0],
+#     #                           polarity_analysis(sort_star_or_global(file_name))[1]
+#     #                           )
+#     sorted_data = sort_articles('global')
+#     polarity = polarity_analysis(sorted_data)
+#
+#     global_ = FilteredDataset(sorted_data[0],
+#                               datetime_converter_global(file_name),
+#                               sorted_data[2],
+#                               polarity[0],
+#                               polarity[1]
+#                               )
+#     return global_
+#
+#
+# def store_cbc_to_dataclass(file_name: str) -> FilteredDataset:
+#     """Store all filtered sections of the given dataset into a FilteredDataset class, such filtered
+#     sections include: titles, datetime.datetime publish dates, bodies, title polarity scores, and
+#     body polarity scores.
+#
+#     preconditions:
+#     - file_name == 'dataset/the_star.json'
+#     """
+#     # cbc = FilteredDataset(sort_cbc(file_name)[0],
+#     #                       datetime_converter_cbc(file_name),
+#     #                       sort_cbc(file_name)[2],
+#     #                       polarity_analysis(sort_cbc(file_name))[0],
+#     #                       polarity_analysis(sort_cbc(file_name))[1]
+#     #                       )
+#     sorted_data = sort_articles('cbc')
+#     polarity = polarity_analysis(sorted_data)
+#
+#     cbc = FilteredDataset(sorted_data[0],
+#                           datetime_converter_cbc(file_name),
+#                           sorted_data[2],
+#                           polarity[0],
+#                           polarity[1]
+#                           )
+#     return cbc
 
 
 if __name__ == "__main__":
