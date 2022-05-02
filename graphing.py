@@ -3,7 +3,7 @@ Graphs our data using plotly.graph_objects and writes to a png image
 using kaleido.
 """
 import datetime
-import csv
+# import csv
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
@@ -16,8 +16,7 @@ import bankruptcy as b
 # - csv
 # - datetime
 
-# Global constants. These never change, and we really don't want to call
-# store_cbc_to_dataclass more than once since it is very, very slow.
+# Global Constants
 PUBLISH_DATES = [
     datetime.datetime(2020, 7, 14),
     datetime.datetime(2020, 11, 13),
@@ -26,21 +25,25 @@ PUBLISH_DATES = [
     datetime.datetime(2021, 8, 27)
 ]
 
-CBC = f.store_cbc_to_dataclass('dataset/articles.json')
-GLOBAL = f.store_global_to_dataclass('dataset/global.json')
-STAR = f.store_star_to_dataclass('dataset/the_star.json')
+f.load_business_data()
+CBC = f.store_to_dataclass('cbc')
+GLOBAL = f.store_to_dataclass('global')
+STAR = f.store_to_dataclass('star')
+# CBC = f.store_cbc_to_dataclass('dataset/cbc.json')
+# GLOBAL = f.store_global_to_dataclass('dataset/global.json')
+# STAR = f.store_star_to_dataclass('dataset/the_star.json')
 
 
 def get_avg_polarity(start_date: datetime.datetime, 
-                    end_date: datetime.datetime,
-                    data: f.FilteredDataset) -> tuple[int, int]:
+                     end_date: datetime.datetime,
+                     data: f.FilteredDataset) -> tuple[int, int]:
     """
     Returns number of positive articles and number of articles in data that were
     published within a given date range.
     """
     articles = []
     for i in range(len(data.publish_dates)):
-        if data.publish_dates[i] > start_date and data.publish_dates[i] <= end_date:
+        if start_date < data.publish_dates[i] <= end_date:
             articles.append(data.body_polarity_scores[i])
 
     pos_articles = 0
@@ -129,7 +132,7 @@ def generate_graph(time_ind: int, size_ind: int) -> str:
         go.Bar(
             x=[d.date() for d in PUBLISH_DATES],
             y=[b.bankruptcy_value(data, time_length=sample_time, 
-                                employee_size=sample_size) for data in filtered_data],
+                                  employee_size=sample_size) for data in filtered_data],
             name=f'%age of businesses with {sample_size} <br> bankrupt in {sample_time}'
         ),
         row=1, col=1
@@ -137,7 +140,7 @@ def generate_graph(time_ind: int, size_ind: int) -> str:
 
     fig.update_layout(
         title="Positive Media Representation vs Time until Bankruptcy",
-        xaxis=dict(type = 'category'),
+        xaxis=dict(type='category'),
         yaxis={
             'title': 'Percentage'
         },

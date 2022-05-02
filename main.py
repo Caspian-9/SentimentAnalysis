@@ -44,7 +44,6 @@ class Image:
     filename: str
 
 
-
 class App:
     """
     Manager class of our app.
@@ -90,12 +89,11 @@ class App:
             img_name = g.generate_graph(i, 2)
             self.image_list_by_time.append(Image(55, 0, img_name))
 
-        #generate graphs for different numbers of employees
+        # generate graphs for different numbers of employees
         for i in range(len(b.EMPLOYEE_SIZE)):
             # fix time until bankruptcy to 6-12 months
             img_name = g.generate_graph(3, i)
             self.image_list_by_employee.append(Image(55, 0, img_name))
-
 
     def run(self) -> None:
         """
